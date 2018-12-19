@@ -80,7 +80,6 @@ services:
     restart: unless-stopped
     volumes:
       - ${WP_CORE1}:/var/www/html
-      - ${WP_CONTENT1}:/var/www/html/wp-content
       - ./php/php.ini:/usr/local/etc/php/conf.d/php.ini
     environment:
       WORDPRESS_DB_HOST: ${CONTAINER_DB_NAME}:3306
@@ -103,7 +102,6 @@ services:
     restart: unless-stopped
     volumes:
       - ${WP_CORE2}:/var/www/html
-      - ${WP_CONTENT2}:/var/www/html/wp-content
       - ./php/php.ini:/usr/local/etc/php/conf.d/php.ini
     environment:
       WORDPRESS_DB_HOST: ${CONTAINER_DB_NAME}:3306
