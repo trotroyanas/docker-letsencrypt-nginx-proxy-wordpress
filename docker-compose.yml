@@ -15,7 +15,8 @@ services:
       - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
       - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
-      - ${NGINX_FILES_PATH:-./data}/logs/nginx:/var/log/nginx:rw      
+      - ${NGINX_FILES_PATH:-./data}/logs/nginx:/var/log/nginx:rw
+
     logging:
       driver: ${NGINX_WEB_LOG_DRIVER:-json-file}
       options:
@@ -66,6 +67,8 @@ services:
     container_name: ${CONTAINER_DB_NAME}
     image: mariadb:latest
     restart: unless-stopped
+    ports:
+      - "9001:3306"
     volumes:
       - ${DB_PATH}:/var/lib/mysql
     environment:
@@ -73,7 +76,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-
 
   wpress1:
     depends_on:
