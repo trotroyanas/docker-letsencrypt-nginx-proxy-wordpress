@@ -1,5 +1,37 @@
 version: '3'
 services:
+
+  cadvisor:
+    image: google/cadvisor
+    container_name: ${CADVISOR}
+    ports:
+      - 9002:8080
+    restart: always
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    environment:
+      VIRTUAL_HOST: ${DOMAINS_CADVISOR}
+      LETSENCRYPT_HOST: ${DOMAINS_CADVISOR}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+
+  portainer:
+    image: portainer/portainer
+    container_name: ${PORTAINER}
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/docker/portainer/:/data
+    ports:
+      - 9006:9000
+    environment:
+      VIRTUAL_HOST: ${DOMAINS_PORTAINER}
+      LETSENCRYPT_HOST: ${DOMAINS_PORTAINER}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+
+
   nginx-web:
     image: nginx
     labels:
@@ -15,6 +47,8 @@ services:
       - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
       - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
+      - ${NGINX_FILES_PATH:-./data}/logs/nginx:/var/log/nginx:rw
+
     logging:
       driver: ${NGINX_WEB_LOG_DRIVER:-json-file}
       options:
@@ -32,6 +66,7 @@ services:
       - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
       - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
+      - ${NGINX_FILES_PATH:-./data}/logs/nginx-gen:/var/log/nginx:rw
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
     logging:
@@ -49,6 +84,7 @@ services:
       - ${NGINX_FILES_PATH:-./data}/vhost.d:/etc/nginx/vhost.d
       - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:rw
+      - ${NGINX_FILES_PATH:-./data}/logs/nginx-letsencrypt:/var/log/nginx:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       NGINX_DOCKER_GEN_CONTAINER: ${DOCKER_GEN:-nginx-gen}
@@ -63,6 +99,8 @@ services:
     container_name: ${CONTAINER_DB_NAME}
     image: mariadb:latest
     restart: unless-stopped
+    ports:
+      - "9001:3306"
     volumes:
       - ${DB_PATH}:/var/lib/mysql
     environment:
@@ -70,7 +108,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-
 
   wpress1:
     depends_on:
@@ -121,3 +158,4 @@ networks:
   default:
     external:
       name: ${NETWORK:-webproxy}
+
