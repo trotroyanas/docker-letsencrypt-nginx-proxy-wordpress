@@ -4,6 +4,15 @@
 création de la base et du user dans mariadb
 infortion user & password à reporter sur le .env
 
+#exemple 
+--DROP DATABASE IF EXISTS MyBdd;
+CREATE DATABASE MyBdd;
+CREATE USER MyUser IDENTIFIED BY 'MyPassword';
+GRANT ALL PRIVILEGES ON MyBdd.* TO MyUser;
+FLUSH PRIVILEGES;
+SHOW GRANTS FOR MyUser;
+
+
 #Step 2 - Droits
 Après démarage du container changer les droits des dosseirs de l'hôte
 #Pour les plugins 
