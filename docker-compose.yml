@@ -1,37 +1,6 @@
 version: '3'
 services:
 
-  cadvisor:
-    image: google/cadvisor
-    container_name: ${CADVISOR}
-    ports:
-      - 9002:8080
-    restart: always
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    environment:
-      VIRTUAL_HOST: ${DOMAINS_CADVISOR}
-      LETSENCRYPT_HOST: ${DOMAINS_CADVISOR}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-
-  portainer:
-    image: portainer/portainer
-    container_name: ${PORTAINER}
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/docker/portainer/:/data
-    ports:
-      - 9006:9000
-    environment:
-      VIRTUAL_HOST: ${DOMAINS_PORTAINER}
-      LETSENCRYPT_HOST: ${DOMAINS_PORTAINER}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-
-
   nginx-web:
     image: nginx
     labels:
@@ -42,12 +11,12 @@ services:
       - "${IP:-0.0.0.0}:${DOCKER_HTTP:-80}:80"
       - "${IP:-0.0.0.0}:${DOCKER_HTTPS:-443}:443"
     volumes:
-      - ${NGINX_FILES_PATH:-./data}/conf.d:/etc/nginx/conf.d
-      - ${NGINX_FILES_PATH:-./data}/vhost.d:/etc/nginx/vhost.d
-      - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
-      - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
-      - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
-      - ${NGINX_FILES_PATH:-./data}/logs/nginx:/var/log/nginx:rw
+      - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+      - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+      - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+      - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
+      - ${NGINX_FILES_PATH}/htpasswd:/etc/nginx/htpasswd:ro
+      - ${NGINX_FILES_PATH}/logs/nginx:/var/log/nginx:rw
 
     logging:
       driver: ${NGINX_WEB_LOG_DRIVER:-json-file}
@@ -61,12 +30,12 @@ services:
     container_name: ${DOCKER_GEN:-nginx-gen}
     restart: always
     volumes:
-      - ${NGINX_FILES_PATH:-./data}/conf.d:/etc/nginx/conf.d
-      - ${NGINX_FILES_PATH:-./data}/vhost.d:/etc/nginx/vhost.d
-      - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
-      - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
-      - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
-      - ${NGINX_FILES_PATH:-./data}/logs/nginx-gen:/var/log/nginx:rw
+      - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+      - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+      - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+      - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
+      - ${NGINX_FILES_PATH}/htpasswd:/etc/nginx/htpasswd:ro
+      - ${NGINX_FILES_PATH}/logs/nginx-gen:/var/log/nginx:rw
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
     logging:
@@ -80,11 +49,11 @@ services:
     container_name: ${LETS_ENCRYPT:-nginx-letsencrypt}
     restart: always
     volumes:
-      - ${NGINX_FILES_PATH:-./data}/conf.d:/etc/nginx/conf.d
-      - ${NGINX_FILES_PATH:-./data}/vhost.d:/etc/nginx/vhost.d
-      - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
-      - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:rw
-      - ${NGINX_FILES_PATH:-./data}/logs/nginx-letsencrypt:/var/log/nginx:rw
+      - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+      - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+      - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+      - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:rw
+      - ${NGINX_FILES_PATH}/logs/nginx-letsencrypt:/var/log/nginx:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       NGINX_DOCKER_GEN_CONTAINER: ${DOCKER_GEN:-nginx-gen}
@@ -109,6 +78,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
+
   wpress1:
     depends_on:
       - db
@@ -124,12 +94,13 @@ services:
       WORDPRESS_DB_USER: ${WP1_USER}
       WORDPRESS_DB_PASSWORD: ${WP1_PWD}
       #WORDPRESS_TABLE_PREFIX: ${WP1_TBL_PREFIX}
-      VIRTUAL_HOST: ${DOMAINS1}
-      LETSENCRYPT_HOST: ${DOMAINS1}
+      VIRTUAL_HOST: www.${DOMAINS1}
+      LETSENCRYPT_HOST: www.${DOMAINS1}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     logging:
       options:
         max-size: ${LOGGING_OPTIONS_MAX_SIZE:-200k}
+
 
   wpress2:
     depends_on:
@@ -145,17 +116,16 @@ services:
       WORDPRESS_DB_NAME: ${WP2_DB_NAME}
       WORDPRESS_DB_USER: ${WP2_USER}
       WORDPRESS_DB_PASSWORD: ${WP2_PWD}
-      VIRTUAL_HOST: ${DOMAINS2}
-      LETSENCRYPT_HOST: ${DOMAINS2}
+      #WORDPRESS_TABLE_PREFIX: ${WP1_TBL_PREFIX}
+      VIRTUAL_HOST: www.${DOMAINS2}
+      LETSENCRYPT_HOST: www.${DOMAINS2}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     logging:
       options:
         max-size: ${LOGGING_OPTIONS_MAX_SIZE:-200k}
 
 
-
 networks:
   default:
     external:
       name: ${NETWORK:-webproxy}
-
