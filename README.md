@@ -1,8 +1,8 @@
 # docker-letsencrypt-nginx-proxy-wordpress
 
-#Step 1
-copy .env.sample .env
-modification des éléments dans .env
+#Step 1_
+copy .env.sample .env_
+modification des éléments dans .env_
 
 
 #Step 2
