@@ -38,7 +38,7 @@ contient par defaut :
   post_max_size = 64M
   max_execution_time = 600
 
-# set client body size to XXXM #
+set client body size to XXXM #
 client_max_body_size XXXM;
 detruire et refaire le docker wpress pour activer les cgangements 
 
