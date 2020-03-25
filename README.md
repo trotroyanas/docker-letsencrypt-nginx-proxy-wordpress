@@ -29,7 +29,14 @@ Après démarage du container changer les droits des dossiers de l'hôte<br>
 chmod 777 -R /var/docker/wpress (affiner les droits, c'est pour les plugins et autres uploads)<br>
 <br>
 #Step 5 - Upload (changer si necessaire)<br>
-le repertoire ./php/php.ini<br>
+<br>
+# pour nginx proxy <br>
+docker exec -it (IDcontainer celui du nginx-web)  /bin/bash<br>
+en suite une fois connecté editer /etc/nginx/nginx.conf<br>
+et rajouter client_max_body_size 256M;<br>
+<br>
+# pour wordpress<br>
+le repertoire du host ./php/php.ini<br>
 contient par defaut :<br>
   file_uploads = On<br>
   memory_limit = 64M<br>
